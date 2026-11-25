@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['@tannin/core', '@tannin/supabase'],
+  transpilePackages: ['@tannin/core', '@tannin/supabase', '@tannin/content'],
   async headers() {
     return [
       {

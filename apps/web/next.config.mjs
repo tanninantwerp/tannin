@@ -7,7 +7,7 @@ const nextConfig = {
   reactStrictMode: true,
   // The shared packages ship TypeScript source rather than a build step, so Next
   // compiles them itself. Same trick keeps Metro happy on the Expo side.
-  transpilePackages: ['@tannin/core', '@tannin/supabase'],
+  transpilePackages: ['@tannin/core', '@tannin/supabase', '@tannin/content'],
   typedRoutes: true,
   // Old WordPress URLs (ta-nnin.be before 2026-11-25) that Google still lists.
   async redirects() {

@@ -1,5 +1,7 @@
 import { hasLocale } from 'next-intl';
 import { getRequestConfig } from 'next-intl/server';
+import { applyOverrides, DEFAULT_MESSAGES } from '@tannin/content';
+import { siteTextEdits } from '@/lib/site-texts';
 import { routing } from './routing';
 
 export default getRequestConfig(async ({ requestLocale }) => {
@@ -11,6 +13,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     // Pinned, so a date rendered at build time in one timezone cannot come out
     // a day off for a reader in another.
     timeZone: 'Europe/Brussels',
-    messages: (await import(`../messages/${locale}.json`)).default,
+    // The wording in packages/content/messages, with the edits from Admin > Texts on top.
+    messages: applyOverrides(DEFAULT_MESSAGES[locale], await siteTextEdits(), locale),
   };
 });

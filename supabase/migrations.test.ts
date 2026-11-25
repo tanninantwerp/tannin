@@ -1745,3 +1745,20 @@ describe('gift vouchers (0053)', () => {
     ]);
   });
 });
+
+describe('site texts and pages (0055)', () => {
+  it('keeps a text edit keyed by its message path', async () => {
+    await db.exec(`insert into site_texts (key, value) values ('about.heading', '{"en":"Hello","nl":"Hallo"}')
+                   on conflict (key) do update set value = excluded.value`);
+    const r = await db.query<{ v: string }>(`select value->>'nl' as v from site_texts where key = 'about.heading'`);
+    expect(r.rows[0].v).toBe('Hallo');
+    await expect(db.exec(`insert into site_texts (key) values ('no spaces allowed')`)).rejects.toThrow();
+  });
+
+  it('starts a page as a draft and refuses an address with spaces or capitals', async () => {
+    await db.exec(`insert into pages (slug, title) values ('private-events', '{"en":"Private events"}') on conflict (slug) do nothing`);
+    const r = await db.query<{ published: boolean; in_footer: boolean }>(`select published, in_footer from pages where slug = 'private-events'`);
+    expect(r.rows[0]).toEqual({ published: false, in_footer: false });
+    await expect(db.exec(`insert into pages (slug) values ('Private Events')`)).rejects.toThrow();
+  });
+});

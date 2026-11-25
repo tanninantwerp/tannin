@@ -4,6 +4,7 @@ import { SHOP, VENUE } from '@tannin/core';
 import { Link } from '@/i18n/navigation';
 import { HomeLink } from './home-link';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { FooterPages } from './FooterPages';
 
 /** Fixed bottom line credit. */
 function ForgedBy() {
@@ -82,6 +83,7 @@ export function SiteFooter() {
           <Link href="/gift" className="hover:text-[var(--color-green-pale)]">
             {t('gift')}
           </Link>
+          <FooterPages />
           <p className="mt-3">
             {VENUE.name} · {VENUE.street}
             <br />

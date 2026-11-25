@@ -322,7 +322,7 @@ export async function reorderEvents(db: SupabaseClient, orderedIds: readonly str
 export async function uploadMediaFile(
   db: SupabaseClient,
   file: File,
-  folder: 'events' | 'menu' | 'wine' | 'social',
+  folder: 'events' | 'menu' | 'wine' | 'social' | 'pages',
 ): Promise<string> {
   const ext = /\.[a-z0-9]+$/i.exec(file.name)?.[0]?.toLowerCase() ?? '';
   const path = `${folder}/${crypto.randomUUID()}${ext}`;

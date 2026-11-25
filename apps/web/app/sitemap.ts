@@ -3,6 +3,7 @@ import { getPathname } from '@/i18n/navigation';
 import { routing, type StaticRoute } from '@/i18n/routing';
 import { LOCALE_TAG } from '@/i18n/tags';
 import { IS_LIVE_SITE, SITE_URL } from '@/lib/site';
+import { publishedPages } from '@/components/FooterPages';
 
 /**
  * Every public page, in both languages.
@@ -40,14 +41,26 @@ const PRIORITY: Partial<Record<StaticRoute, number>> = {
   '/menu': 0.8,
 };
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Empty on the demo and on previews. robots.txt already refuses those, and
   // publishing a map of pages nobody may crawl only contradicts it.
   if (!IS_LIVE_SITE) return [];
 
   const lastModified = new Date();
 
-  return PUBLIC_ROUTES.flatMap((href) =>
+  // Pages added in Admin > Pages, at /<slug>, /nl/<slug> and /fr/<slug>.
+  const path = (slug: string, l: string) => `${SITE_URL}${l === routing.defaultLocale ? '' : `/${l}`}/${slug}`;
+  const added: MetadataRoute.Sitemap = (await publishedPages()).flatMap((p) =>
+    routing.locales.map((locale) => ({
+      url: path(p.slug, locale),
+      lastModified: new Date(p.updatedAt),
+      changeFrequency: 'monthly' as const,
+      priority: 0.5,
+      alternates: { languages: Object.fromEntries(routing.locales.map((l) => [LOCALE_TAG[l], path(p.slug, l)])) },
+    })),
+  );
+
+  const fixed = PUBLIC_ROUTES.flatMap((href) =>
     routing.locales.map((locale) => ({
       url: `${SITE_URL}${getPathname({ href, locale })}`,
       lastModified,
@@ -65,4 +78,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       },
     })),
   );
+
+  return [...fixed, ...added];
 }

@@ -46,6 +46,9 @@ const TABS: { href: string; label: string; needs: Permission[] }[] = [
   { href: '/vouchers', label: 'Vouchers', needs: ['vouchers'] },
   { href: '/events', label: 'Events', needs: ['marketing'] },
   { href: '/social', label: 'Social', needs: ['marketing'] },
+  // The website's own texts and the pages staff add (from the 58diamonds admin).
+  { href: '/texts', label: 'Texts', needs: ['marketing'] },
+  { href: '/pages', label: 'Pages', needs: ['marketing'] },
   { href: '/closures', label: 'Closures', needs: ['tables'] },
   { href: '/staff', label: 'People', needs: ['people'] },
 ];
