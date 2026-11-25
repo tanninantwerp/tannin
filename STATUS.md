@@ -1,8 +1,9 @@
 # Tannin: status
 
-**Updated:** 2026-11-25 late evening CET (live site moved to the new Supabase; Vercel is now the demo). This repo (`tanninantwerp/Tannin`) is the new home. The old repo `szaidman55/Tannin` still exists and still deploys Vercel.
+**Updated:** 2026-11-25 23:20 CET (content editor from 58diamonds in draft PR #1; live site moved to the new Supabase; Vercel is now the demo). This repo (`tanninantwerp/Tannin`) is the new home. The old repo `szaidman55/Tannin` still exists and still deploys Vercel.
 
 ## State
+- **Draft PR #1 (branch `claude/project-thread-2k2el7`): content editor ported from 58diamonds.** Admin > Texts (all 353 website texts in EN/NL/FR, search, 'missing a language' filter, Original, DeepL Translate) and Admin > Pages (new pages at /<slug>, /nl/<slug>, /fr/<slug>, Markdown text, photo, footer link, sitemap). Messages moved to `packages/content/messages`. Migration 0055 (`site_texts`, `pages`) NOT run yet on any database. Web build + local run checked on the Mac against the live DB; admin screens not yet tried against a DB with 0055.
 - **ta-nnin.be is LIVE on Cloudflare since 2026-11-25 ~21:50 CET** (replaced the old WordPress site). Registrar Easyhost; nameservers alexia/donovan.ns.cloudflare.com (zone in the Tannin Cloudflare account; the old zone sat in a third-party Cloudflare account). Worker custom domains: ta-nnin.be + www.ta-nnin.be -> tannin-web, admin.ta-nnin.be -> tannin-admin (in `wrangler.jsonc`, workers.dev kept on). Redirect rule www -> apex (301). Old WordPress URLs redirect (next.config.mjs: /about-us, /contact, /food-menu, /wine-menu, /jobs). Checked: pages 200, webhook 400 unsigned, admin 200 on the new nameservers (some resolvers still cached 'no admin' at 22:05).
 - Live Stripe webhook renamed `tannin-web-live`, now -> https://ta-nnin.be/api/stripe/webhook (same secret). Both Workers rebuilt with NEXT_PUBLIC_SITE_URL/WEB_URL=https://ta-nnin.be and ADMIN_URL=https://admin.ta-nnin.be. Admin crons are back ON (reminders are harmless: booking is off).
 - **Live site is on the NEW Supabase since 2026-11-25** (`vbtscmnskepilywenquu`, eu-central-1, under the Tannin account). Schema = the 54 migrations; data, 6 auth users (same passwords) and the 11 `media` files copied from the old project; counts matched old vs new right before the switch; 6 image links rewritten to the new project. Both Workers rebuilt (`build-env.sh` reads the new URL + publishable key from `secrets/supabase.env`) and given the new `SUPABASE_SECRET_KEY`. Checked: pages, event images, wine list, voucher PDF (service key) all OK; admin bundle points at the new project.
@@ -21,11 +22,13 @@
 - Tested on Free: a real Stripe test purchase (voucher 10007, 150 EUR, 2026-11-25) was activated by the new webhook, so payment + confirmation work. **The voucher PDF download fails on Free**: 5 of 12 parallel downloads hit `exceededCpu` (503) on fresh isolates; warm ones work (about 0.5 s). Sacha's own download failed this way. Fixed by Workers Paid (bought 2026-11-25 on Sacha's card, monthly; swap to the owner's card in Billing > Payment info): 24 of 24 parallel downloads OK. Stripe webhook rejects unsigned calls (400); admin voucher PDF refuses without login (403). Instagram sync runs but says no Instagram account is connected in the database: that is true on Vercel too (no INSTAGRAM_APP_ID/SECRET anywhere), so it has not been syncing.
 
 ## Needs Sacha
+0. PR #1 (content editor): OK to run migration 0055 on the live Supabase (adds two tables, changes nothing existing), then merge and deploy both Workers. Optional: a DeepL API Free key as `DEEPL_API_KEY` on the admin Worker for the Translate links.
 1. Later: move the Workers Paid billing to the owner's card.
 4. Hero decision (CE-LLAR logo, old branch `cellar-logo` in szaidman55/Tannin; not copied here).
 5. Confirm the live Stripe account is in the owner's name with the right bank account (payouts). VAT treatment of vouchers with the accountant. Optional: one small real purchase + refund to prove the live webhook.
 
 ## Next steps
+0. After PR #1 is live: fill the French texts that are missing (57, incl. the whole gift page, which shows raw keys on /fr/gift today) in Admin > Texts.
 1. Decide whether to connect Instagram (needs a Meta app ID/secret).
 2. (done) Admin login confirmed on the new database 2026-11-25.
 3. Connect this repo to Cloudflare Workers Builds (Git) so pushes deploy; set the weekly backup secret `SUPABASE_DB_URL`.
