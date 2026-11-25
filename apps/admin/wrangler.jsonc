@@ -8,5 +8,7 @@
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
   // Same times as the old vercel.json, in UTC.
   "triggers": { "crons": ["0 6 * * *", "0 7 * * *"] },
+  "workers_dev": true,
+  "routes": [{ "pattern": "admin.ta-nnin.be", "custom_domain": true }],
   "observability": { "enabled": true }
 }
