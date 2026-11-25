@@ -22,7 +22,7 @@
 - Tested on Free: a real Stripe test purchase (voucher 10007, 150 EUR, 2026-11-25) was activated by the new webhook, so payment + confirmation work. **The voucher PDF download fails on Free**: 5 of 12 parallel downloads hit `exceededCpu` (503) on fresh isolates; warm ones work (about 0.5 s). Sacha's own download failed this way. Fixed by Workers Paid (bought 2026-11-25 on Sacha's card, monthly; swap to the owner's card in Billing > Payment info): 24 of 24 parallel downloads OK. Stripe webhook rejects unsigned calls (400); admin voucher PDF refuses without login (403). Instagram sync runs but says no Instagram account is connected in the database: that is true on Vercel too (no INSTAGRAM_APP_ID/SECRET anywhere), so it has not been syncing.
 
 ## Needs Sacha
-0. PR #1 (content editor): OK to run migration 0055 on the live Supabase (adds two tables, changes nothing existing), then merge and deploy both Workers. Optional: a DeepL API Free key as `DEEPL_API_KEY` on the admin Worker for the Translate links.
+0. PR #1 (content editor): OK to run migration 0055 on the live Supabase (adds two tables, changes nothing existing), then merge and deploy both Workers. DeepL API Free key `DEEPL_API_KEY` is already loaded on the admin Worker (2026-11-25, also in `secrets/admin.env` on the Mac).
 1. Later: move the Workers Paid billing to the owner's card.
 4. Hero decision (CE-LLAR logo, old branch `cellar-logo` in szaidman55/Tannin; not copied here).
 5. Confirm the live Stripe account is in the owner's name with the right bank account (payouts). VAT treatment of vouchers with the accountant. Optional: one small real purchase + refund to prove the live webhook.
