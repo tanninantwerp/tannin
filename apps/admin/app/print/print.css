@@ -58,20 +58,19 @@
 }
 
 .dish-line {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
+  /* Inline, not flex: a name that wraps to two lines would make its flex box
+     as wide as the column and push the price to the far edge. Inline, the
+     price follows the last word, as on one-line dishes. */
+  display: block;
   font-weight: 700;
   font-size: 9pt;
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
 
-.dish-name {
-  flex: 0 1 auto;
-}
-
 .dish-price {
+  margin-left: 6px;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
