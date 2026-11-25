@@ -1,13 +1,14 @@
 # Tannin: status
 
-**Updated:** 2026-11-25 19:00 CET (hosting move, cloud session). This repo (`tanninantwerp/Tannin`) is the new home. The old repo `szaidman55/Tannin` still exists and still deploys Vercel.
+**Updated:** 2026-11-25 19:25 CET (hosting move, cloud session). This repo (`tanninantwerp/Tannin`) is the new home. The old repo `szaidman55/Tannin` still exists and still deploys Vercel.
 
 ## State
 - In-house booking switched off 2026-11-25 (`IN_HOUSE_BOOKING_ENABLED = false` in packages/core/src/booking.ts): `/book` (all languages), the manage-booking page and the booking API answer 404, and `/book` is out of the sitemap. Code kept. Reserve goes to Zenchef.
 - `tanninantwerp/Tannin` `main` is a fresh copy (no history) of old `main` plus the Cloudflare work from old PR #12, **without the pitch demo** (Sacha's choice, 2026-11-25): no `/demo` pages on web or admin, no demo mode, no demo QR codes, no demo-user seed script. The in-house booking code (`/book`, admin reservation screens) is still in the repo, just not linked.
 - Nothing is connected to this repo yet: pushing `main` here deploys nothing.
 - Vercel (old repo), the live Supabase `otkngcakummnuwnqnqvg` and DNS are untouched.
-- Every issued voucher is a Stripe test purchase. The live Stripe account "Ta-nnin x Ce-llar" has no payments.
+- **Stripe is LIVE on the Vercel site since 2026-11-25 ~19:20** (tannin-web.vercel.app, Production only; Preview stays on test): restricted live key `tannin-web` (rk_live, "full access except sensitive operations"), live publishable key, live webhook `tannin-web-vercel-live` -> https://tannin-web.vercel.app/api/stripe/webhook (4 events). Account Ta-nnin x Ce-llar (acct_1UVYtZC73Jjab0CZ). Checked: gift page serves pk_live, webhook rejects unsigned calls. Not yet proven with a real purchase. Vouchers 10000-10007 are test purchases.
+- Cloudflare stays on Stripe TEST until Workers Paid; then make a second live webhook for tannin-web.tannin.workers.dev and fill `STRIPE_WEBHOOK_SECRET_CLOUDFLARE_LIVE` in `secrets/live.env` on the Mac.
 
 ## Cloudflare (Workers Free, account of tannin@18diam.com)
 - Deployed from Sacha's Mac on 2026-11-25: https://tannin-web.tannin.workers.dev and https://tannin-admin.tannin.workers.dev (crons 06:00 and 07:00 UTC on admin).
@@ -20,7 +21,7 @@
 1. Workers Paid (5 USD/month) with the owner's card: fixes the PDF download. A Brevo API key for email.
 3. New Supabase project (EU) under the Tannin account, then data copy.
 4. Hero decision (CE-LLAR logo, old branch `cellar-logo` in szaidman55/Tannin; not copied here).
-5. Tawat's Stripe account and live keys. VAT treatment of vouchers with the accountant.
+5. Confirm the live Stripe account is in the owner's name with the right bank account (payouts). VAT treatment of vouchers with the accountant. Optional: one small real purchase + refund to prove the live webhook.
 
 ## Next steps
 1. After Workers Paid: rerun the parallel PDF test (12 at once, expect 12 x 200). Decide whether to connect Instagram (needs a Meta app ID/secret).
