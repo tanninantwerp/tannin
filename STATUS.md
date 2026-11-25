@@ -1,8 +1,9 @@
 # Tannin: status
 
-**Updated:** 2026-11-25 18:45 CET (hosting move, cloud session). This repo (`tanninantwerp/Tannin`) is the new home. The old repo `szaidman55/Tannin` still exists and still deploys Vercel.
+**Updated:** 2026-11-25 19:00 CET (hosting move, cloud session). This repo (`tanninantwerp/Tannin`) is the new home. The old repo `szaidman55/Tannin` still exists and still deploys Vercel.
 
 ## State
+- In-house booking switched off 2026-11-25 (`IN_HOUSE_BOOKING_ENABLED = false` in packages/core/src/booking.ts): `/book` (all languages), the manage-booking page and the booking API answer 404, and `/book` is out of the sitemap. Code kept. Reserve goes to Zenchef.
 - `tanninantwerp/Tannin` `main` is a fresh copy (no history) of old `main` plus the Cloudflare work from old PR #12, **without the pitch demo** (Sacha's choice, 2026-11-25): no `/demo` pages on web or admin, no demo mode, no demo QR codes, no demo-user seed script. The in-house booking code (`/book`, admin reservation screens) is still in the repo, just not linked.
 - Nothing is connected to this repo yet: pushing `main` here deploys nothing.
 - Vercel (old repo), the live Supabase `otkngcakummnuwnqnqvg` and DNS are untouched.
@@ -22,7 +23,7 @@
 5. Tawat's Stripe account and live keys. VAT treatment of vouchers with the accountant.
 
 ## Next steps
-1. After Workers Paid: rerun the parallel PDF test (12 at once, expect 12 x 200). Decide whether to connect Instagram (needs a Meta app ID/secret). Open question to Sacha: strip the unused in-house booking code (`/book`, admin reservation screens, 07:00 reminder cron)?
+1. After Workers Paid: rerun the parallel PDF test (12 at once, expect 12 x 200). Decide whether to connect Instagram (needs a Meta app ID/secret).
 2. New Supabase, copy data, rebuild both Workers against it.
 3. Connect this repo to Cloudflare Workers Builds (Git) so pushes deploy; set the weekly backup secret `SUPABASE_DB_URL`.
 4. DNS for ta-nnin.be into Cloudflare, custom domains, move Stripe webhook and Instagram URLs. Checklist: `docs/hosting-cloudflare.md`.
