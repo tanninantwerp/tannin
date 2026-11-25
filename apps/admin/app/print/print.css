@@ -1,0 +1,255 @@
+/*
+ * Print menus. These pages exist to come out of a printer, not to live in the
+ * admin's dark tool-chrome - so everything here is black ink on the same bone
+ * card stock the physical menus use, regardless of the admin theme.
+ *
+ * Each print route sets its own `@page` size (A5 / A4, portrait / landscape)
+ * from a <style> tag in the page itself, because `@page` is document-global and
+ * only one print route is ever open in a tab at once.
+ */
+
+.print-root {
+  --paper: #f7f4ec;
+  --ink: #16130f;
+  --muted: #6b655c;
+  --rule: #d8d2c4;
+  color: var(--ink);
+  font-family: 'Helvetica Neue', Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* A printed sheet. Width/height come from the page component (in mm). */
+.sheet {
+  position: relative;
+  box-sizing: border-box;
+  background: var(--paper);
+  color: var(--ink);
+  overflow: hidden;
+}
+
+/* ── Menu typography ──────────────────────────────────────────────────────── */
+
+.brandmark {
+  width: 92px;
+  height: auto;
+}
+
+.strapline {
+  font-size: 8.5pt;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7a5a3a;
+  font-style: italic;
+}
+
+.sec-head {
+  font-size: 9pt;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 2px;
+  margin-bottom: 7px;
+}
+
+.dish {
+  break-inside: avoid;
+  margin-bottom: 7px;
+}
+
+.dish-line {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 9pt;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.dish-name {
+  flex: 0 1 auto;
+}
+
+.dish-price {
+  font-variant-numeric: tabular-nums;
+}
+
+.dish-note {
+  margin-top: 1px;
+  font-size: 8pt;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--muted);
+}
+
+.dish-soldout {
+  font-style: normal;
+  font-size: 7.5pt;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+/* ── QR block: wine glass + code + rotated "scan me" ──────────────────────── */
+
+.qr-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.qr-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qr-glass {
+  width: 22px;
+  height: 22px;
+}
+
+.qr-code {
+  display: block;
+}
+
+.qr-cta {
+  font-style: italic;
+  font-weight: 700;
+  font-size: 9pt;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* ── Footer notes ─────────────────────────────────────────────────────────── */
+
+.foot-strong {
+  font-weight: 700;
+  font-size: 8pt;
+  letter-spacing: 0.02em;
+}
+
+.foot-note {
+  font-size: 7.5pt;
+  color: var(--muted);
+  max-width: 60ch;
+}
+
+.foot-box {
+  border: 1px solid var(--ink);
+  padding: 6px 10px;
+  font-weight: 700;
+  font-size: 8pt;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+/* ── Wine list (A4) ───────────────────────────────────────────────────────── */
+
+.wine-row {
+  break-inside: avoid;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 9pt;
+}
+
+.wine-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.wine-producer {
+  font-weight: 700;
+}
+
+.wine-meta {
+  font-size: 7.5pt;
+  color: var(--muted);
+}
+
+.wine-price {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ── Screen preview vs print ──────────────────────────────────────────────── */
+
+@media screen {
+  .print-shell {
+    min-height: 100vh;
+    padding: 84px 16px 40px;
+    background: #3c3c3c;
+  }
+  .sheet {
+    margin: 0 auto 20px;
+    box-shadow: 0 8px 34px rgba(0, 0, 0, 0.45);
+  }
+  .print-toolbar {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    background: #16130f;
+    color: #f7f4ec;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+  }
+  .print-toolbar a {
+    font-size: 13px;
+    color: #f7f4ec;
+  }
+  .print-back {
+    text-decoration: none;
+    border: 1px solid rgba(247, 244, 236, 0.4);
+    border-radius: 6px;
+    padding: 6px 12px;
+  }
+  .print-toolbar .print-btn {
+    background: #f7f4ec;
+    color: #16130f;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .print-hint {
+    color: #b8b2a6;
+    font-size: 12px;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+  .print-shell {
+    padding: 0;
+  }
+  .sheet {
+    margin: 0;
+    box-shadow: none;
+    page-break-after: always;
+    /* Printed on pre-coloured stock - don't lay down a beige background. */
+    background: transparent;
+  }
+  .sheet:last-child {
+    page-break-after: auto;
+  }
+}

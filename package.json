@@ -1,0 +1,32 @@
+{
+  "name": "tannin",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Ta-nnin - Urban Street Wine. Web + native apps for bookings, menu and shop.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "web": "npm run dev --workspace=@tannin/web",
+    "mobile": "npm run start --workspace=@tannin/mobile",
+    "db:types": "supabase gen types typescript --local > packages/supabase/src/database.types.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.4",
+    "prettier": "^3.4.2",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "npm@10.9.0"
+}

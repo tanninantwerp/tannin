@@ -1,0 +1,410 @@
+@import 'tailwindcss';
+
+/*
+ * Tokens sampled from the logo artwork: the black is #000105, the green
+ * #417e79. Neutrals are pulled very slightly toward the green so nothing on the
+ * page reads as a default grey.
+ */
+@theme {
+  --color-ink: #000105;
+  --color-ink-soft: #14181a;
+  --color-green: #417e79;
+  --color-green-deep: #2f5d59;
+  --color-green-pale: #a8c6c2;
+  --color-stamp: #434b66;
+  --color-paper: #f3f0e9;
+  --color-paper-dim: #e4dfd4;
+  --color-bone: #faf8f4;
+  --color-slate: #5c6462;
+  --color-slate-dim: #8b918f;
+  --color-18forge: #f37021; /* Forged by credit, hover and focus */
+  /* CE-LLAR's red: the neon X over the shop door and its red walls. */
+  --color-cellar: #b3121f;
+  --color-cellar-glow: #ff5561;
+  /* The house neon sign's yellow tube; fills the Gift vouchers tab. */
+  --color-neon-yellow: #fce068;
+
+  --font-display: 'Voces', ui-serif, Georgia, serif;
+  --font-body: 'Work Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --text-hero: clamp(3rem, 11vw, 8.5rem);
+  --text-section: clamp(1.75rem, 4.5vw, 3rem);
+}
+
+/*
+ * Semantic layer. Components style through these, never through the raw
+ * palette, so the dark treatment below is a token swap rather than a rewrite.
+ */
+:root {
+  --surface: var(--color-paper);
+  --surface-raised: var(--color-bone);
+  --surface-edge: color-mix(in oklab, var(--color-ink) 12%, transparent);
+  --text: var(--color-ink);
+  --text-muted: var(--color-slate);
+  --accent: var(--color-green-deep);
+  --danger: #a8341f;
+  --cellar-ink: var(--color-cellar);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #0d1011;
+    --surface-raised: #151a1b;
+    --surface-edge: color-mix(in oklab, var(--color-green-pale) 16%, transparent);
+    --text: #ece9e2;
+    --text-muted: #9aa3a1;
+    --accent: var(--color-green-pale);
+    --danger: #e07a6b;
+    --cellar-ink: var(--color-cellar-glow);
+    color-scheme: dark;
+  }
+}
+
+/* The viewer's own toggle must beat the media query in both directions. */
+:root[data-theme='dark'] {
+  --surface: #0d1011;
+  --surface-raised: #151a1b;
+  --surface-edge: color-mix(in oklab, var(--color-green-pale) 16%, transparent);
+  --text: #ece9e2;
+  --text-muted: #9aa3a1;
+  --accent: var(--color-green-pale);
+  --danger: #e07a6b;
+  --cellar-ink: var(--color-cellar-glow);
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --surface: var(--color-paper);
+  --surface-raised: var(--color-bone);
+  --surface-edge: color-mix(in oklab, var(--color-ink) 12%, transparent);
+  --text: var(--color-ink);
+  --text-muted: var(--color-slate);
+  --accent: var(--color-green-deep);
+  --danger: #a8341f;
+  --cellar-ink: var(--color-cellar);
+  color-scheme: light;
+}
+
+/*
+ * Ink, not paper.
+ *
+ * iOS Safari colours the area behind its own chrome from the body's
+ * background, which was the cream page surface - so the site opened with a
+ * band of cream above a black hero, and `theme-color` alone did not shift it.
+ * The surface moves to a wrapper inside the body instead, so every section
+ * that relied on inheriting it looks exactly as it did, while the body itself
+ * is the same ink the page actually begins and ends on.
+ */
+body {
+  background: var(--color-ink);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Keyboard users get a visible ring; mouse users do not. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /*
+   * The neon sign is the deliberate exception: it keeps flickering even here.
+   * On iOS, Reduce Motion is mostly turned on for the app-open zoom and
+   * parallax, not for a bar sign - so the reset above would kill the one bit of
+   * life the hero is meant to have. This restores its two animations (the `*`
+   * rule above zeroed their duration and iteration-count). It is only safe to do
+   * because the flicker is kept under the WCAG 3-flashes-per-second threshold -
+   * a slow strike plus rare dips, never a strobe. Do not speed it up.
+   */
+  .neon-logo,
+  .neon-cross {
+    animation-duration: 1.4s, 11s !important;
+    animation-iteration-count: 1, infinite !important;
+  }
+}
+
+/*
+ * The mark, lit as a neon sign - built to read as thin glass TUBE, not a
+ * glowing solid letter. The fat logo letterforms are traced along their exact
+ * edges (outlined in make-tube.mjs) and redrawn as thin uniform-width tube, so
+ * the mark keeps its precise font while every stroke - big letters and the
+ * small "urban street wine" alike - is a slim line at the same weight. Two
+ * masked layers:
+ *   ::before  logo-tube.png  - the thin tube, one uniform saturated colour.
+ *   ::after   logo-core.png  - a hairline near-white centre: the hot core.
+ * The glow and the bloom behind come from layered drop-shadows on the
+ * container, which follow the tube's alpha. One brightness lever (`--nf`, 0..1)
+ * dims tube, core and glow together, the way a real tube does.
+ *
+ * Colour is the only thing a variant may change. The six hues below are the
+ * whole palette of the sign; geometry, size, strike and flicker live in this
+ * one rule and are shared by every tone, so a variant cannot drift out of sync
+ * with the original by being edited separately. Red is the house sign and the
+ * default - see `.neon-logo--yellow` / `--blue` under it for the others.
+ *
+ * The flicker is deliberately NOT a smooth pulse - that reads as an animation.
+ * A real sign strikes with a short irregular stutter on power-up, then holds
+ * rock-steady with only rare, abrupt micro-dropouts: an ignition burst that
+ * settles to full, then a long mostly-flat idle loop with two brief,
+ * unevenly-spaced flickers per cycle.
+ */
+@property --nf {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 1;
+}
+
+/*
+ * What makes a tube a lit tube, shared by the homepage sign and the CE-LLAR
+ * cross (`.neon-cross`, below): the palette, the glow, and the strike and
+ * flicker. The cross is the same gas on the same circuit, so it takes this
+ * rule rather than a copy of it.
+ */
+.neon-logo,
+.neon-cross {
+  /* Red: the house sign. */
+  --neon-tube: #ff1a29;
+  --neon-core: #fff0f1;
+  --neon-glow-near: #ff5561;
+  --neon-glow-mid: #ff0a18;
+  --neon-glow-far: #f00016;
+  --neon-bloom: #c1000f;
+
+  opacity: calc(0.32 + 0.68 * var(--nf));
+  filter: brightness(calc(0.6 + 0.4 * var(--nf)))
+    drop-shadow(0 0 1px var(--neon-glow-near))
+    drop-shadow(0 0 4px var(--neon-glow-mid))
+    drop-shadow(0 0 10px var(--neon-glow-far))
+    drop-shadow(0 0 22px var(--neon-bloom));
+  will-change: opacity, filter;
+  animation:
+    neon-strike 1.4s ease-out both,
+    neon-flicker 11s 1.4s ease-in-out infinite;
+}
+
+.neon-logo {
+  position: relative;
+  display: block;
+  /*
+   * The phone size. It lived on the element as `w-[min(66vw,22rem)]` until a
+   * template literal in the className put a `${` hard against it and Tailwind's
+   * scanner stopped extracting the class - the utility vanished from the bundle
+   * and the span collapsed to zero width on phones, while desktop carried on
+   * looking fine because the rule below sets its own width. Sizing lives here
+   * with the rest of the sign now, where nothing has to find it.
+   */
+  width: min(66vw, 22rem);
+  aspect-ratio: 1132 / 1090;
+}
+
+/* The lit glass tube: thin, one uniform saturated colour. */
+.neon-logo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--neon-tube);
+  -webkit-mask: url(/brand/logo-tube.png) center / contain no-repeat;
+  mask: url(/brand/logo-tube.png) center / contain no-repeat;
+}
+
+/* A hairline hot core down the centre of each tube. */
+.neon-logo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--neon-core);
+  -webkit-mask: url(/brand/logo-core.png) center / contain no-repeat;
+  mask: url(/brand/logo-core.png) center / contain no-repeat;
+}
+
+/*
+ * The neon cross from CE-LLAR's ceiling, drawn round the logo on /cellar.
+ * An inline SVG rather than masked PNGs: it is a dozen straight lines, so the
+ * tube and its hot core are two strokes of one path (see NeonCross.tsx), each
+ * painted from the same palette as the sign.
+ */
+.neon-cross {
+  overflow: visible;
+  pointer-events: none;
+}
+
+/*
+ * The other two tubes, for the /home2 and /home3 colourways.
+ *
+ * Colour only. Same specificity as the base rule and placed after it, so these
+ * win the six hues and inherit everything else - the sign is the same sign.
+ *
+ * Turquoise is the brand's own teal lit up rather than a colour of its own:
+ * `--color-green-pale`, the ink on the Book a table button and the "urban
+ * street wine" line of the logo, sits at hue 172, and the tube is hue 173. The
+ * blue this replaces was hue 200 - far enough round to read as a third colour
+ * in the room rather than the house one turned on.
+ *
+ * What the tube does not copy from that swatch is how quiet it is. A brand ink
+ * is a flat colour printed on paper; this is gas, so it keeps the hue and takes
+ * the chroma and the brightness a lit tube has (luminance 206, against the
+ * yellow tube's 221 - teal cannot reach yellow at equal chroma, and trying only
+ * greys it). Deepest of the ramp reaches hue 181 as it spreads, the same small
+ * drift the yellow makes.
+ *
+ * Yellow is not invented at all. It is sampled from the bar's own sign - the
+ * "YOU CAN'T DRINK WINE ALL DAY SO START ON TIME" tube in the Instagram feed
+ * on the home page - so the two yellows in the room are the same yellow. The
+ * measured values, averaged by luminance band across that photo:
+ *
+ *   tube core (brightest 0.05%)  #f0e19d   hue 49
+ *   tube body                    #ebdd8e   hue 51
+ *   light thrown on the backing  #c7a25b   hue 39
+ *   far glow                     #734411   hue 31
+ *
+ * The hue is the part of that worth trusting: around 50, not the 44 of the
+ * amber this started as. The paleness is not. A camera metering a room this
+ * dark blows out the one bright object in it, so the tube reads far closer to
+ * white in the photo than it does to the eye - sampled literally it came out
+ * washed, a cream rather than a yellow. So the measurement sets the hue and
+ * the eye sets the chroma: luminance held where that sampled cream had it
+ * (221 against 219, so no dimmer), and the blue channel pulled back from 143
+ * to 104, which is where the colour was hiding.
+ *
+ * Hue sits at 49, which is a gold rather than a lemon. Pushing it to 54 gets
+ * a cleaner, more acid yellow, but the sign hangs over a warm photograph -
+ * bare brick, timber, tungsten - and a yellow that cool reads as a separate
+ * light source pasted on top of the room rather than one lit inside it.
+ *
+ * The glow ramp keeps the tube's hue and only deepens as it spreads. In the
+ * photo it warms to brown, but that brown is the wooden backboard the light
+ * lands on, not the gas - ours lands on a photograph of the room, so it makes
+ * the same drift (49 to 46 to 44 to 41) without borrowing the timber.
+ */
+.neon-logo--yellow {
+  --neon-tube: #fce068;
+  --neon-core: #fff3ba;
+  --neon-glow-near: #f4d350;
+  --neon-glow-mid: #e4bb35;
+  --neon-glow-far: #c2961e;
+  --neon-bloom: #8f6712;
+}
+
+.neon-logo--turquoise {
+  --neon-tube: #6ee9da;
+  --neon-core: #d6fff9;
+  --neon-glow-near: #3fdccb;
+  --neon-glow-mid: #16b4a6;
+  --neon-glow-far: #0a8d86;
+  --neon-bloom: #05585a;
+}
+
+/*
+ * On the phone the sign stays in the stacked flow (it reads well there). From
+ * the `sm` breakpoint up it lifts out of the flow to the top-left, over the dark
+ * ceiling of the photo, clear of the seated guests. Set here, not with
+ * utilities, because the unlayered `.neon-logo` rule above outranks layered
+ * Tailwind utilities and would keep winning `position`.
+ */
+@media (min-width: 640px) {
+  .neon-logo {
+    position: absolute;
+    top: 6%;
+    left: 0;
+    width: min(38vw, 22rem);
+  }
+}
+
+/*
+ * Power-up: gas striking. Two spaced stutters, then settles to fully lit - the
+ * dips are kept ~370ms apart (well under WCAG's 3-flashes-per-second seizure
+ * threshold) so it reads as a strike, not a strobe, which matters because this
+ * runs even under Reduce Motion (see below).
+ */
+@keyframes neon-strike {
+  0% { --nf: 0; }
+  8% { --nf: 0.9; }
+  16% { --nf: 0.15; }
+  26% { --nf: 1; }
+  42% { --nf: 0.35; }
+  52% { --nf: 1; }
+  100% { --nf: 1; }
+}
+
+/*
+ * Idle: steady almost the whole loop. One quick single blip early, one ragged
+ * double-stutter later; keyframe pairs sit close together so each dip is abrupt,
+ * not eased. Everything else holds at full.
+ */
+@keyframes neon-flicker {
+  0%, 22% { --nf: 1; }
+  22.5% { --nf: 0.42; }
+  23% { --nf: 1; }
+  63% { --nf: 1; }
+  63.4% { --nf: 0.6; }
+  63.8% { --nf: 1; }
+  64.3% { --nf: 0.28; }
+  65% { --nf: 1; }
+  100% { --nf: 1; }
+}
+
+@layer components {
+  /*
+   * The organising metaphor: a laminated menu card. Cream stock, a hairline
+   * edge, and the faint diagonal sheen the real cards catch under the lights.
+   */
+  .card-stock {
+    background-color: var(--surface-raised);
+    background-image: linear-gradient(
+      104deg,
+      transparent 38%,
+      color-mix(in oklab, white 22%, transparent) 46%,
+      transparent 54%
+    );
+    border: 1px solid var(--surface-edge);
+  }
+
+  /* Underlined small caps, exactly how the printed card sets its headings. */
+  .menu-heading {
+    font-family: var(--font-body);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 0.35rem;
+  }
+
+  .rule-dotted {
+    flex: 1;
+    border-bottom: 1px dotted color-mix(in oklab, var(--text) 30%, transparent);
+    margin: 0 0.55rem 0.32rem;
+  }
+}
+
+/*
+ * The canvas behind the document, which is what iOS paints when you pull past
+ * the top or the bottom - the rubber-band overscroll.
+ *
+ * `body` is the page surface (cream in light mode) and that used to propagate
+ * to the canvas, so bouncing the page revealed a slab of cream above a black
+ * hero. Setting a background on `html` stops that propagation: the canvas is
+ * ink, and `body` still paints its own surface over the content as before.
+ *
+ * Ink is right at both ends rather than only the top. Every route opens on a
+ * black band - the hero, or the sticky header - and every one except /drinks
+ * closes on the black footer, so the bounce matches the page it is attached
+ * to. /drinks is the exception: it is the bare QR card with no footer, so its
+ * bottom bounce is ink against cream. That is a far quieter mismatch than the
+ * white-above-black this replaces, and not worth a per-page override.
+ */
+html {
+  background: var(--color-ink);
+}

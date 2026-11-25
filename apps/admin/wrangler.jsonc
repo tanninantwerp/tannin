@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // worker.ts wraps the OpenNext worker and adds the daily cron jobs.
+  "main": "worker.ts",
+  "name": "tannin-admin",
+  "compatibility_date": "2025-11-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  // Same times as the old vercel.json, in UTC.
+  "triggers": { "crons": ["0 6 * * *", "0 7 * * *"] },
+  "observability": { "enabled": true }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@tannin/email",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Transactional email for bookings. Server-only - never import this from a client component.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tannin/core": "*",
+    "nodemailer": "^6.9.16"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^6.4.17",
+    "typescript": "^5.7.2"
+  }
+}

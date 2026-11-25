@@ -1,0 +1,40 @@
+# Weekly free backup of the Supabase database (the free plan has no backups).
+# Dumps roles, schema and data with the Supabase CLI and keeps them as a
+# workflow artifact for 90 days. Needs one repository secret:
+#   SUPABASE_DB_URL - the "Session pooler" connection string from Supabase
+#                     (Project settings > Database), password included.
+# Run it by hand from the Actions tab to test, or to take a backup before a
+# risky change. Restore: see docs/hosting-cloudflare.md.
+name: Database backup
+
+on:
+  schedule:
+    - cron: '30 2 * * 1' # Mondays 02:30 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Dump
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          test -n "$SUPABASE_DB_URL" || { echo "SUPABASE_DB_URL secret is not set"; exit 1; }
+          mkdir backup
+          supabase db dump --db-url "$SUPABASE_DB_URL" --role-only -f backup/roles.sql
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f backup/schema.sql
+          supabase db dump --db-url "$SUPABASE_DB_URL" --data-only --use-copy -f backup/data.sql
+          ls -la backup
+      - uses: actions/upload-artifact@v4
+        with:
+          name: supabase-backup-${{ github.run_number }}
+          path: backup/
+          retention-days: 90

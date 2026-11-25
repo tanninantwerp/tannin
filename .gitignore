@@ -1,0 +1,59 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# builds
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# turbo
+.turbo/
+
+# expo
+.expo/
+.expo-shared/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+ios/
+android/
+
+# env
+.env
+.env*.local
+!.env.example
+
+# supabase
+supabase/.branches
+supabase/.temp
+
+# editors / os
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# local working notes, not project files
+handover/
+
+# logs
+npm-debug.log*
+yarn-error.log*
+*.log
+
+# Written by `vercel link`. The .env rules it also appends are dropped: the
+# block above already covers them, and a blanket `.env*` down here would
+# re-ignore .env.example after that block deliberately un-ignores it.
+.vercel
+
+# Cloudflare (OpenNext + wrangler) build output and local secrets
+.open-next/
+.wrangler/
+.dev.vars*
