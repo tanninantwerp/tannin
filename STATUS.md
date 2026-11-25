@@ -1,17 +1,19 @@
 # Tannin: status
 
-**Updated:** 2026-11-25 20:25 CET (hosting move, cloud session). This repo (`tanninantwerp/Tannin`) is the new home. The old repo `szaidman55/Tannin` still exists and still deploys Vercel.
+**Updated:** 2026-11-25 22:10 CET (ta-nnin.be live on Cloudflare). This repo (`tanninantwerp/Tannin`) is the new home. The old repo `szaidman55/Tannin` still exists and still deploys Vercel.
 
 ## State
+- **ta-nnin.be is LIVE on Cloudflare since 2026-11-25 ~21:50 CET** (replaced the old WordPress site). Registrar Easyhost; nameservers alexia/donovan.ns.cloudflare.com (zone in the Tannin Cloudflare account; the old zone sat in a third-party Cloudflare account). Worker custom domains: ta-nnin.be + www.ta-nnin.be -> tannin-web, admin.ta-nnin.be -> tannin-admin (in `wrangler.jsonc`, workers.dev kept on). Redirect rule www -> apex (301). Old WordPress URLs redirect (next.config.mjs: /about-us, /contact, /food-menu, /wine-menu, /jobs). Checked: pages 200, webhook 400 unsigned, admin 200 on the new nameservers (some resolvers still cached 'no admin' at 22:05).
+- Live Stripe webhook renamed `tannin-web-live`, now -> https://ta-nnin.be/api/stripe/webhook (same secret). Both Workers rebuilt with NEXT_PUBLIC_SITE_URL/WEB_URL=https://ta-nnin.be and ADMIN_URL=https://admin.ta-nnin.be. Admin crons are back ON (reminders are harmless: booking is off).
+- Vercel (tannin-web.vercel.app) still runs in parallel on the same Supabase with its own live webhook; nothing links to it any more.
 - In-house booking switched off 2026-11-25 (`IN_HOUSE_BOOKING_ENABLED = false` in packages/core/src/booking.ts): `/book` (all languages), the manage-booking page and the booking API answer 404, and `/book` is out of the sitemap. Code kept. Reserve goes to Zenchef.
 - `tanninantwerp/Tannin` `main` is a fresh copy (no history) of old `main` plus the Cloudflare work from old PR #12, **without the pitch demo** (Sacha's choice, 2026-11-25): no `/demo` pages on web or admin, no demo mode, no demo QR codes, no demo-user seed script. The in-house booking code (`/book`, admin reservation screens) is still in the repo, just not linked.
-- Nothing is connected to this repo yet: pushing `main` here deploys nothing.
-- Vercel (old repo), the live Supabase `otkngcakummnuwnqnqvg` and DNS are untouched.
+- Nothing is connected to this repo yet: pushing `main` deploys nothing; deploy from the Mac.
+- The live Supabase `otkngcakummnuwnqnqvg` (old, on Sacha's Vercel integration) is still the database for everything.
 - **Stripe is LIVE on the Vercel site since 2026-11-25 ~19:20** (tannin-web.vercel.app, Production only; Preview stays on test): restricted live key `tannin-web` (rk_live, "full access except sensitive operations"), live publishable key, live webhook `tannin-web-vercel-live` -> https://tannin-web.vercel.app/api/stripe/webhook (4 events). Account Ta-nnin x Ce-llar (acct_1UVYtZC73Jjab0CZ). Checked: gift page serves pk_live, webhook rejects unsigned calls. Not yet proven with a real purchase. Vouchers 10000-10007 are test purchases.
 - **Stripe is LIVE on Cloudflare too since 2026-11-25** (tannin-web.tannin.workers.dev): same rk_live key, live webhook `tannin-web-cloudflare-live` (we_1UfllpC73Jjab0CZZKHxFmem, 4 events), rebuilt with pk_live (`build-env.sh` now reads pk_live from `secrets/live.env`). Checked: build has only pk_live, webhook rejects unsigned (400), pages 200. Admin Worker has no Stripe key.
 
 ## Cloudflare (Workers Paid since 2026-11-25, account of tannin@18diam.com)
-- **Admin Worker daily crons are OFF** (2026-11-25, `wrangler triggers deploy` with empty crons) so booking reminders don't go out twice while Vercel's crons still run. Any `cf:deploy` of admin turns them back on; that should happen only at go-live, together with pausing Vercel.
 - Deployed from Sacha's Mac on 2026-11-25: https://tannin-web.tannin.workers.dev and https://tannin-admin.tannin.workers.dev (crons 06:00 and 07:00 UTC on admin).
 - Local clone for deploys: `~/Documents/GitHub/tannin-cloudflare` on the Mac. Wrangler for this account uses `XDG_CONFIG_HOME=~/.config/tannin-cf` (the default wrangler login is another account). Build variables: `source ~/.config/tannin-cf/build-env.sh`, then `npm run cf:deploy` in `apps/web` / `apps/admin` with `NEXT_PUBLIC_SITE_URL` set. The Mac's npm has `omit=dev`, so install with `npm ci --include=dev`.
 - Tested 2026-11-25: all main pages 200 (home, en/nl/fr, wine, menu, drinks, events, gift, book, admin hub/print/closures/vouchers); `/demo` 404 on both.
@@ -28,7 +30,7 @@
 1. Decide whether to connect Instagram (needs a Meta app ID/secret).
 2. New Supabase, copy data, rebuild both Workers against it.
 3. Connect this repo to Cloudflare Workers Builds (Git) so pushes deploy; set the weekly backup secret `SUPABASE_DB_URL`.
-4. DNS for ta-nnin.be into Cloudflare (step 1: add zone + copy records + switch nameservers, no visible change; step 2 later: point the domains at the Workers, rebuild with NEXT_PUBLIC_SITE_URL=https://ta-nnin.be, turn crons on, pause Vercel), custom domains, move Stripe webhook and Instagram URLs. Checklist: `docs/hosting-cloudflare.md`.
+4. Pause Vercel after a quiet week (then delete its live webhook `tannin-web-vercel-live`). Optional: Google Search Console for ta-nnin.be + submit sitemap.
 
 ## Watch out
 - In the old repo `szaidman55/Tannin`, pushing `main` deploys Vercel. This repo deploys nothing yet.
