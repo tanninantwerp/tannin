@@ -1,9 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { createDrink, deleteDrink, setDrinkSoldOut, updateDrink } from '@tannin/supabase';
+import { createDrink, deleteDrink, setDrinkSoldOut, setOnMenu, updateDrink } from '@tannin/supabase';
 import type { DrinkCategory } from '@tannin/core';
 import { getDb } from '@/lib/supabase';
+import { OffMenuList } from './OffMenuList';
 
 interface Row {
   id: string;
@@ -12,6 +13,7 @@ interface Row {
   note: string | null;
   price: number;
   sold_out: boolean;
+  on_menu?: boolean;
   position: number;
 }
 
@@ -43,7 +45,7 @@ export function BarListEditor() {
     setError(null);
     const [s, d] = await Promise.all([
       getDb().from('drink_sections').select('id, title, position').order('position'),
-      getDb().from('drinks').select('id, section_id, name, note, price, sold_out, position').order('position'),
+      getDb().from('drinks').select('*').order('position'),
     ]);
     if (s.error || d.error) {
       setError((s.error ?? d.error)!.message);
@@ -124,7 +126,7 @@ export function BarListEditor() {
     <main className="admin-main">
       <h1 className="page-title">The bar list</h1>
       <p className="page-dek">
-        Changes are live the moment you make them. {rows.length} pours.
+        Changes are live the moment you make them. {rows.filter((r) => r.on_menu !== false).length} pours.
       </p>
 
       {error && (
@@ -134,7 +136,8 @@ export function BarListEditor() {
       )}
 
       {sections.map((section) => {
-        const items = rows.filter((r) => r.section_id === section.id);
+        const items = rows.filter((r) => r.section_id === section.id && r.on_menu !== false);
+        const offMenu = rows.filter((r) => r.section_id === section.id && r.on_menu === false);
         return (
           <section key={section.id} className="mt-9">
             <h2 className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">
@@ -214,8 +217,16 @@ export function BarListEditor() {
                   </button>
 
                   <button
+                    onClick={() => optimistic(row.id, { on_menu: false }, () => setOnMenu(getDb(), 'drinks', row.id, false))}
+                    title="Take off the menu (kept below, can come back)"
+                    className="btn btn-quiet shrink-0"
+                  >
+                    Hide
+                  </button>
+
+                  <button
                     onClick={() => {
-                      if (!confirm(`Remove ${row.name} from the list?`)) return;
+                      if (!confirm(`Delete ${row.name} for good? Hide keeps it for later.`)) return;
                       setRows((p) => p.filter((r) => r.id !== row.id));
                       deleteDrink(getDb(), row.id).catch(load);
                     }}
@@ -264,6 +275,10 @@ export function BarListEditor() {
                 </li>
               )}
             </ul>
+            <OffMenuList
+              items={offMenu.map((r) => ({ id: r.id, name: r.name, detail: r.note, price: r.price }))}
+              onRestore={(id) => optimistic(id, { on_menu: true }, () => setOnMenu(getDb(), 'drinks', id, true))}
+            />
           </section>
         );
       })}

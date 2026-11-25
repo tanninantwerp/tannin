@@ -209,6 +209,23 @@ export async function setWineStaffPick(
   if (error) throw error;
 }
 
+// ── on the menu ──────────────────────────────────────────────────────────────
+
+/**
+ * Takes a dish, a pour or a bottle off the menu, or puts it back. Off the menu
+ * means hidden on the website and the printed menus but kept in the admin, so
+ * a seasonal item can return with its notes, grapes and position intact.
+ */
+export async function setOnMenu(
+  db: SupabaseClient,
+  table: 'menu_items' | 'drinks' | 'wines',
+  id: string,
+  onMenu: boolean,
+): Promise<void> {
+  const { error } = await db.from(table).update({ on_menu: onMenu }).eq('id', id);
+  if (error) throw error;
+}
+
 // ── access ───────────────────────────────────────────────────────────────────
 
 /** Whether the signed-in user may use the admin at all. */

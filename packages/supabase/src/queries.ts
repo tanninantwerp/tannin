@@ -40,7 +40,8 @@ export async function fetchMenu(db: SupabaseClient): Promise<MenuSection[]> {
     title: section.title as string,
     service: section.service as MenuSection['service'],
     items: (section.menu_items ?? [])
-      .filter((item: { sold_out: boolean }) => !item.sold_out)
+      // Sold out tonight or off the menu for now: either way, not on the page.
+      .filter((item: { sold_out: boolean; on_menu?: boolean }) => !item.sold_out && item.on_menu !== false)
       .map((item: Record<string, unknown>) => {
         // One, two or three tiers, in order - the Ibérico is 11 / 16 / 19.
         const tiers = [Number(item.price)];
@@ -60,7 +61,8 @@ export async function fetchMenu(db: SupabaseClient): Promise<MenuSection[]> {
 /**
  * Every wine on the list, sold out or not - a sold-out bottle stays on the
  * page priced out, same as a sold-out pour on the bar list, rather than
- * vanishing. Only deleting the row in admin does that.
+ * vanishing. A bottle taken off the menu (`on_menu = false`) is left out; the
+ * admin keeps it so it can come back.
  */
 export async function fetchWines(db: SupabaseClient): Promise<Wine[]> {
   const { data, error } = await db
@@ -71,7 +73,7 @@ export async function fetchWines(db: SupabaseClient): Promise<Wine[]> {
 
   if (error) throw error;
 
-  return (data ?? []).map((w) => ({
+  return (data ?? []).filter((w) => w.on_menu !== false).map((w) => ({
     id: w.id,
     // A handful of cellar rows were imported as UTF-8 and stored as
     // Windows-1252, which is why the list showed "Les Longeroies â€” Marsannay".
@@ -104,7 +106,8 @@ export async function fetchWines(db: SupabaseClient): Promise<Wine[]> {
 export async function fetchBarList(db: SupabaseClient): Promise<DrinkSection[]> {
   const { data, error } = await db
     .from('drink_sections')
-    .select('id, title, is_wine, position, drinks (name, note, price, sold_out, position)')
+    // `drinks (*)` so the on_menu filter below works before and after its migration.
+    .select('id, title, is_wine, position, drinks (*)')
     .order('position')
     .order('position', { referencedTable: 'drinks' });
 
@@ -114,12 +117,14 @@ export async function fetchBarList(db: SupabaseClient): Promise<DrinkSection[]> 
     id: section.id as DrinkCategory,
     title: section.title as string,
     ...(section.is_wine ? { isWine: true as const } : {}),
-    items: (section.drinks ?? []).map((d: Record<string, unknown>) => ({
-      name: d.name as string,
-      ...(d.note ? { note: d.note as string } : {}),
-      price: Number(d.price),
-      ...(d.sold_out ? { soldOut: true as const } : {}),
-    })),
+    items: (section.drinks ?? [])
+      .filter((d: Record<string, unknown>) => d.on_menu !== false)
+      .map((d: Record<string, unknown>) => ({
+        name: d.name as string,
+        ...(d.note ? { note: d.note as string } : {}),
+        price: Number(d.price),
+        ...(d.sold_out ? { soldOut: true as const } : {}),
+      })),
   }));
 }
 
