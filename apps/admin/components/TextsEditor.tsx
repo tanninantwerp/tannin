@@ -43,15 +43,18 @@ export function TextsEditor() {
   const changed = (k: string) => draft[k] !== undefined;
   const customised = (k: string) => Object.keys(strip(saved[k])).length > 0;
   const missing = (t: TextDef) => LOCALES.filter((l) => !current(t)[l]?.trim());
+  // What is missing on the site now, ignoring unsaved typing, so a text being
+  // filled in stays in the "missing" list until it is saved.
+  const missingSaved = (t: TextDef) => LOCALES.filter((l) => !({ ...t.value, ...strip(saved[t.key]) } as L10n)[l]?.trim());
   const pending = Object.keys(draft);
 
   const q = query.trim().toLowerCase();
   const matches = (t: TextDef) =>
-    (!onlyMissing || missing(t).length > 0) &&
+    (!onlyMissing || missingSaved(t).length > 0 || changed(t.key)) &&
     (!q || [t.key, t.label, ...Object.values(current(t))].some((v) => v?.toLowerCase().includes(q)));
   const filtering = Boolean(q) || onlyMissing;
   const found = filtering ? sections.flatMap((s) => s.texts.filter(matches)) : [];
-  const missingTotal = sections.reduce((n, s) => n + s.texts.filter((t) => missing(t).length > 0).length, 0);
+  const missingTotal = sections.reduce((n, s) => n + s.texts.filter((t) => missingSaved(t).length > 0).length, 0);
 
   function problem(k: string): string | null {
     const t = byKey.get(k)!;
