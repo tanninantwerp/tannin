@@ -22,13 +22,12 @@
 
 ## Needs Sacha
 1. Later: move the Workers Paid billing to the owner's card.
-3. Rotate the new Supabase database password once (it was visible on screen during setup); nothing in the app uses it.
 4. Hero decision (CE-LLAR logo, old branch `cellar-logo` in szaidman55/Tannin; not copied here).
 5. Confirm the live Stripe account is in the owner's name with the right bank account (payouts). VAT treatment of vouchers with the accountant. Optional: one small real purchase + refund to prove the live webhook.
 
 ## Next steps
 1. Decide whether to connect Instagram (needs a Meta app ID/secret).
-2. Log in once to admin.ta-nnin.be to confirm login on the new database.
+2. (done) Admin login confirmed on the new database 2026-11-25.
 3. Connect this repo to Cloudflare Workers Builds (Git) so pushes deploy; set the weekly backup secret `SUPABASE_DB_URL`.
 4. Keep Vercel as the demo; delete the disabled live webhook `tannin-web-vercel-live` when sure. Optional: Google Search Console for ta-nnin.be + submit sitemap.
 
