@@ -11,6 +11,7 @@
 - **Stripe is LIVE on Cloudflare too since 2026-11-25** (tannin-web.tannin.workers.dev): same rk_live key, live webhook `tannin-web-cloudflare-live` (we_1UfllpC73Jjab0CZZKHxFmem, 4 events), rebuilt with pk_live (`build-env.sh` now reads pk_live from `secrets/live.env`). Checked: build has only pk_live, webhook rejects unsigned (400), pages 200. Admin Worker has no Stripe key.
 
 ## Cloudflare (Workers Paid since 2026-11-25, account of tannin@18diam.com)
+- **Admin Worker daily crons are OFF** (2026-11-25, `wrangler triggers deploy` with empty crons) so booking reminders don't go out twice while Vercel's crons still run. Any `cf:deploy` of admin turns them back on; that should happen only at go-live, together with pausing Vercel.
 - Deployed from Sacha's Mac on 2026-11-25: https://tannin-web.tannin.workers.dev and https://tannin-admin.tannin.workers.dev (crons 06:00 and 07:00 UTC on admin).
 - Local clone for deploys: `~/Documents/GitHub/tannin-cloudflare` on the Mac. Wrangler for this account uses `XDG_CONFIG_HOME=~/.config/tannin-cf` (the default wrangler login is another account). Build variables: `source ~/.config/tannin-cf/build-env.sh`, then `npm run cf:deploy` in `apps/web` / `apps/admin` with `NEXT_PUBLIC_SITE_URL` set. The Mac's npm has `omit=dev`, so install with `npm ci --include=dev`.
 - Tested 2026-11-25: all main pages 200 (home, en/nl/fr, wine, menu, drinks, events, gift, book, admin hub/print/closures/vouchers); `/demo` 404 on both.
@@ -27,7 +28,7 @@
 1. Decide whether to connect Instagram (needs a Meta app ID/secret).
 2. New Supabase, copy data, rebuild both Workers against it.
 3. Connect this repo to Cloudflare Workers Builds (Git) so pushes deploy; set the weekly backup secret `SUPABASE_DB_URL`.
-4. DNS for ta-nnin.be into Cloudflare, custom domains, move Stripe webhook and Instagram URLs. Checklist: `docs/hosting-cloudflare.md`.
+4. DNS for ta-nnin.be into Cloudflare (step 1: add zone + copy records + switch nameservers, no visible change; step 2 later: point the domains at the Workers, rebuild with NEXT_PUBLIC_SITE_URL=https://ta-nnin.be, turn crons on, pause Vercel), custom domains, move Stripe webhook and Instagram URLs. Checklist: `docs/hosting-cloudflare.md`.
 
 ## Watch out
 - In the old repo `szaidman55/Tannin`, pushing `main` deploys Vercel. This repo deploys nothing yet.
