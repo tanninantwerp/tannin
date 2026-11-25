@@ -8,13 +8,13 @@
 - Nothing is connected to this repo yet: pushing `main` here deploys nothing.
 - Vercel (old repo), the live Supabase `otkngcakummnuwnqnqvg` and DNS are untouched.
 - **Stripe is LIVE on the Vercel site since 2026-11-25 ~19:20** (tannin-web.vercel.app, Production only; Preview stays on test): restricted live key `tannin-web` (rk_live, "full access except sensitive operations"), live publishable key, live webhook `tannin-web-vercel-live` -> https://tannin-web.vercel.app/api/stripe/webhook (4 events). Account Ta-nnin x Ce-llar (acct_1UVYtZC73Jjab0CZ). Checked: gift page serves pk_live, webhook rejects unsigned calls. Not yet proven with a real purchase. Vouchers 10000-10007 are test purchases.
-- Cloudflare stays on Stripe TEST until Workers Paid; then make a second live webhook for tannin-web.tannin.workers.dev and fill `STRIPE_WEBHOOK_SECRET_CLOUDFLARE_LIVE` in `secrets/live.env` on the Mac.
+- **Stripe is LIVE on Cloudflare too since 2026-11-25** (tannin-web.tannin.workers.dev): same rk_live key, live webhook `tannin-web-cloudflare-live` (we_1UfllpC73Jjab0CZZKHxFmem, 4 events), rebuilt with pk_live (`build-env.sh` now reads pk_live from `secrets/live.env`). Checked: build has only pk_live, webhook rejects unsigned (400), pages 200. Admin Worker has no Stripe key.
 
 ## Cloudflare (Workers Paid since 2026-11-25, account of tannin@18diam.com)
 - Deployed from Sacha's Mac on 2026-11-25: https://tannin-web.tannin.workers.dev and https://tannin-admin.tannin.workers.dev (crons 06:00 and 07:00 UTC on admin).
 - Local clone for deploys: `~/Documents/GitHub/tannin-cloudflare` on the Mac. Wrangler for this account uses `XDG_CONFIG_HOME=~/.config/tannin-cf` (the default wrangler login is another account). Build variables: `source ~/.config/tannin-cf/build-env.sh`, then `npm run cf:deploy` in `apps/web` / `apps/admin` with `NEXT_PUBLIC_SITE_URL` set. The Mac's npm has `omit=dev`, so install with `npm ci --include=dev`.
 - Tested 2026-11-25: all main pages 200 (home, en/nl/fr, wine, menu, drinks, events, gift, book, admin hub/print/closures/vouchers); `/demo` 404 on both.
-- Both Workers read the **old** Supabase. Secrets loaded 2026-11-25 from `secrets/{web,admin}.env` on the Mac (`wrangler secret bulk`, gitignored via .git/info/exclude): Supabase secret key, Stripe TEST key, new Stripe TEST webhook (Ta-nnin x Ce-llar sandbox, endpoint on workers.dev), booking email, generated THROTTLE_SALT/REVALIDATE_SECRET/CRON_SECRET. No BREVO_API_KEY yet, so no emails send.
+- Both Workers read the **old** Supabase. Secrets loaded 2026-11-25 from `secrets/{web,admin}.env` on the Mac (`wrangler secret bulk`, gitignored via .git/info/exclude): Supabase secret key, Stripe key + webhook (now live, see above), booking email, generated THROTTLE_SALT/REVALIDATE_SECRET/CRON_SECRET. No BREVO_API_KEY yet, so no emails send.
 - Tested on Free: a real Stripe test purchase (voucher 10007, 150 EUR, 2026-11-25) was activated by the new webhook, so payment + confirmation work. **The voucher PDF download fails on Free**: 5 of 12 parallel downloads hit `exceededCpu` (503) on fresh isolates; warm ones work (about 0.5 s). Sacha's own download failed this way. Fixed by Workers Paid (bought 2026-11-25 on Sacha's card, monthly; swap to the owner's card in Billing > Payment info): 24 of 24 parallel downloads OK. Stripe webhook rejects unsigned calls (400); admin voucher PDF refuses without login (403). Instagram sync runs but says no Instagram account is connected in the database: that is true on Vercel too (no INSTAGRAM_APP_ID/SECRET anywhere), so it has not been syncing.
 
 ## Needs Sacha
@@ -24,7 +24,7 @@
 5. Confirm the live Stripe account is in the owner's name with the right bank account (payouts). VAT treatment of vouchers with the accountant. Optional: one small real purchase + refund to prove the live webhook.
 
 ## Next steps
-1. Cloudflare live Stripe: second live webhook for tannin-web.tannin.workers.dev, load live keys into the Worker. Decide whether to connect Instagram (needs a Meta app ID/secret).
+1. Decide whether to connect Instagram (needs a Meta app ID/secret). Add a Brevo API key so Cloudflare sends emails.
 2. New Supabase, copy data, rebuild both Workers against it.
 3. Connect this repo to Cloudflare Workers Builds (Git) so pushes deploy; set the weekly backup secret `SUPABASE_DB_URL`.
 4. DNS for ta-nnin.be into Cloudflare, custom domains, move Stripe webhook and Instagram URLs. Checklist: `docs/hosting-cloudflare.md`.
