@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { MAX_PARTY_ONLINE, validateBooking, windowFor } from '@tannin/core';
+import { IN_HOUSE_BOOKING_ENABLED, MAX_PARTY_ONLINE, validateBooking, windowFor } from '@tannin/core';
 import type { ServiceWindow } from '@tannin/core';
 import { bookingConfirmed, bookingReceived, send } from '@tannin/email';
 import { fetchServiceWindows } from '@tannin/supabase';
@@ -43,6 +43,7 @@ interface Body {
 }
 
 export async function POST(request: Request) {
+  if (!IN_HOUSE_BOOKING_ENABLED) return new Response('Not found.', { status: 404 });
   let body: Body;
   try {
     body = await request.json();

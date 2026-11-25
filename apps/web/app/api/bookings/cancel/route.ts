@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { bookingCancelled, send } from '@tannin/email';
+import { IN_HOUSE_BOOKING_ENABLED } from '@tannin/core';
 import type { BookingArea } from '@tannin/core';
 import { SUPABASE_ANON_KEY, SUPABASE_SERVICE_KEY } from '@/lib/supabase-keys';
 
@@ -32,6 +33,7 @@ const SERVICE = SUPABASE_SERVICE_KEY;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function POST(request: Request) {
+  if (!IN_HOUSE_BOOKING_ENABLED) return new Response('Not found.', { status: 404 });
   let body: { token?: string };
   try {
     body = await request.json();

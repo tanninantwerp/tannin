@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { IN_HOUSE_BOOKING_ENABLED } from '@tannin/core';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { SiteNav } from '@/components/SiteNav';
 import { IN_HOUSE_BOOK } from '@/components/nav-links';
@@ -36,6 +38,7 @@ export async function generateMetadata({
  * chrome around it.
  */
 export default async function BookPage({ params }: { params: Promise<{ locale: string }> }) {
+  if (!IN_HOUSE_BOOKING_ENABLED) notFound();
   const { locale } = await params;
   setRequestLocale(locale);
 

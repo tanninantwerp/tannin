@@ -5,13 +5,22 @@ import type { Blackout, ServiceWindow } from './types';
  * table can never be offered on one surface and refused on another.
  */
 
+/**
+ * Whether the in-house booking flow is open to guests.
+ *
+ * Off: Ta-nnin books through Zenchef. With this off, `/book`, the manage-booking
+ * page and the booking API all answer 404, so nobody can make a booking that
+ * only exists here, where no one is looking. The code stays for later.
+ */
+export const IN_HOUSE_BOOKING_ENABLED = false;
+
 /** How far ahead the public may book. */
 export const BOOKING_HORIZON_DAYS = 365;
 
 /**
  * Largest party the *in-house* booking flow takes online.
  *
- * This governs `/book` and the demo only. Ta-nnin itself books through Zenchef,
+ * This governs `/book` only. Ta-nnin itself books through Zenchef,
  * and Zenchef is set to send anything above `LARGE_PARTY_CONTACT_ABOVE` to the
  * venue instead - so that, not this, is the number the public site quotes. The
  * two are allowed to differ because they guard different doors; if the bar ever

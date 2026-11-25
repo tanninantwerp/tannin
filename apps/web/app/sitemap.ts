@@ -18,7 +18,7 @@ import { IS_LIVE_SITE, SITE_URL } from '@/lib/site';
  */
 
 /** `/booking/[token]` is deliberately absent - it is private and noindex. */
-const PUBLIC_ROUTES: StaticRoute[] = ['/', '/wine', '/drinks', '/menu', '/events', '/cellar', '/about', '/visit', '/book', '/gift'];
+const PUBLIC_ROUTES: StaticRoute[] = ['/', '/wine', '/drinks', '/menu', '/events', '/cellar', '/about', '/visit', '/gift'];
 
 /** Roughly how often each page's content actually moves. */
 const CHANGES: Partial<Record<StaticRoute, MetadataRoute.Sitemap[number]['changeFrequency']>> = {
@@ -30,7 +30,6 @@ const CHANGES: Partial<Record<StaticRoute, MetadataRoute.Sitemap[number]['change
   '/': 'monthly',
   '/about': 'yearly',
   '/visit': 'yearly',
-  '/book': 'yearly',
   '/gift': 'yearly',
 };
 
@@ -39,7 +38,6 @@ const PRIORITY: Partial<Record<StaticRoute, number>> = {
   '/wine': 0.9,
   '/drinks': 0.9,
   '/menu': 0.8,
-  '/book': 0.8,
 };
 
 export default function sitemap(): MetadataRoute.Sitemap {

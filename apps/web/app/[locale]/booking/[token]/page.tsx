@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { IN_HOUSE_BOOKING_ENABLED } from '@tannin/core';
 import { createClient } from '@supabase/supabase-js';
 import { setRequestLocale } from 'next-intl/server';
 import { SiteNav } from '@/components/SiteNav';
@@ -29,6 +30,7 @@ export default async function ManageBookingPage({
 }: {
   params: Promise<{ locale: string; token: string }>;
 }) {
+  if (!IN_HOUSE_BOOKING_ENABLED) notFound();
   const { locale, token } = await params;
   setRequestLocale(locale);
 
