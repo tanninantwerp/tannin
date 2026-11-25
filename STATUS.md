@@ -1,36 +1,34 @@
 # Tannin: status
 
-**Updated:** 2026-11-25 17:55 CET (hosting move, cloud session). Earlier facts from the 19 and 24 Nov checks. This file lives on branch `status-handoff`, not `main`: pushing `main` deploys Vercel. Local `main` has no commits origin lacks.
+**Updated:** 2026-11-25 18:15 CET (hosting move, cloud session). This repo (`tanninantwerp/Tannin`) is the new home. The old repo `szaidman55/Tannin` still exists and still deploys Vercel.
 
 ## State
-`origin/main` (841d1f3) is the live line. It has the gift voucher work: online voucher layout, presets 50 to 500, typed amounts 20 to 3000, migration 0054 applied to Supabase on 10 Nov. Every issued voucher is a Stripe test purchase (10000 to 10004, none redeemed or voided). The live Stripe account "Ta-nnin x Ce-llar" exists but has no payments. The CE-LLAR hero choice is still open.
+- `tanninantwerp/Tannin` `main` is a fresh copy (no history) of old `main` plus the Cloudflare work from old PR #12, **without the pitch demo** (Sacha's choice, 2026-11-25): no `/demo` pages on web or admin, no demo mode, no demo QR codes, no demo-user seed script. The in-house booking code (`/book`, admin reservation screens) is still in the repo, just not linked.
+- Nothing is connected to this repo yet: pushing `main` here deploys nothing.
+- Vercel (old repo), the live Supabase `otkngcakummnuwnqnqvg` and DNS are untouched.
+- Every issued voucher is a Stripe test purchase. The live Stripe account "Ta-nnin x Ce-llar" has no payments.
 
-## Hosting move (started 2026-11-25)
-Moving off Sacha's personal accounts to GitHub account `tanninantwerp`, a new Supabase account and Cloudflare. Vercel, the live database and DNS are still untouched.
-- Decision: Cloudflare. Start on Workers Free and add Workers Paid (5 USD/month) when Sacha is with the owner to enter his card. Don't go live on Free if testing shows failures.
-- Draft PR #12 (branch `cloudflare`): OpenNext config for both apps, admin crons as Cloudflare cron triggers (`apps/admin/worker.ts`), Brevo HTTP API for email when `BREVO_API_KEY` is set, weekly Supabase backup workflow, runbook in `docs/hosting-cloudflare.md`. Builds, typecheck and 213 tests pass. Safe to merge before the switch because Vercel is unchanged.
-- Free-plan risk (10 ms CPU): voucher PDFs (Stripe webhook, gift PDF download, admin voucher PDF) need 45 to 400 ms, Instagram sync is likely heavy, and page renders are borderline.
-- Data to copy to the new Supabase: tables, auth users (admin logins), storage files.
-
-## In progress
-- Branch `cellar-logo` is pushed to origin (4 commits, not merged). It has the new CE-LLAR logo (1717x360) and a hero without the neon cross. The Mac working copy is on it. Merging it as it is would delete the gift voucher package and migrations 0053 and 0054. Do not merge it directly.
-- Untracked on the Mac: `.cloudflare/` and `docs/cellar-instagram/`. Not committed.
-- Local `main` matches `origin/main`. The old local `main` is kept on `backup/main-before-reset-2026-11-16`.
+## Cloudflare (Workers Free, account of tannin@18diam.com)
+- Deployed from Sacha's Mac on 2026-11-25: https://tannin-web.tannin.workers.dev and https://tannin-admin.tannin.workers.dev (crons 06:00 and 07:00 UTC on admin).
+- Local clone for deploys: `~/Documents/GitHub/tannin-cloudflare` on the Mac. Wrangler for this account uses `XDG_CONFIG_HOME=~/.config/tannin-cf` (the default wrangler login is another account). Build variables: `source ~/.config/tannin-cf/build-env.sh`, then `npm run cf:deploy` in `apps/web` / `apps/admin` with `NEXT_PUBLIC_SITE_URL` set. The Mac's npm has `omit=dev`, so install with `npm ci --include=dev`.
+- Tested 2026-11-25: all main pages 200 (home, en/nl/fr, wine, menu, drinks, events, gift, book, admin hub/print/closures/vouchers); `/demo` 404 on both.
+- Builds still read the **old** Supabase (public keys only). Secrets are not loaded yet: Vercel marks them sensitive, so they can't be pulled.
 
 ## Needs Sacha
-0. Hosting move: transfer the repo to `tanninantwerp` (Settings > Transfer) and install the Claude GitHub app there. Then the Supabase EU project, Cloudflare Workers from Git, and nameservers for ta-nnin.be at the registrar.
-1. Hero decision: keep the live CE-LLAR hero with the neon cross (then `cellar-logo` can be dropped), or move the new logo onto `origin/main`.
-2. Tawat's Stripe account (in his name, Sacha as Developer), then live keys in Vercel.
-3. Confirm the VAT treatment of vouchers with the accountant.
+1. Fill `~/Documents/GitHub/tannin-cloudflare/secrets/web.env` and `admin.env` on the Mac (Supabase secret key, Stripe TEST secret key, booking email, Brevo key) and create a Stripe TEST webhook for `https://tannin-web.tannin.workers.dev/api/stripe/webhook` (events: checkout.session.completed, checkout.session.async_payment_succeeded, checkout.session.expired, charge.refunded). Then Claude loads them with `wrangler secret bulk`.
+2. Workers Paid (5 USD/month) with the owner's card.
+3. New Supabase project (EU) under the Tannin account, then data copy.
+4. Hero decision (CE-LLAR logo, old branch `cellar-logo` in szaidman55/Tannin; not copied here).
+5. Tawat's Stripe account and live keys. VAT treatment of vouchers with the accountant.
 
 ## Next steps
-0. Hosting move: after the repo transfer, deploy both Workers to workers.dev on Free, test the risky routes, copy data to the new Supabase, then DNS. Checklist in `docs/hosting-cloudflare.md` (PR #12).
-1. Wait for the hero decision. No code change before it.
-2. Set up Tawat's Stripe account and live keys once Sacha has them.
-3. If the hero changes, port only the logo and hero markup onto a fresh branch from `origin/main`, not from `cellar-logo`.
+1. After secrets: test voucher PDF routes (web `/api/gift/pdf`, admin `/api/vouchers/pdf`), Stripe test checkout + webhook, Instagram sync, and check for CPU-limit errors (1102) on Free.
+2. New Supabase, copy data, rebuild both Workers against it.
+3. Connect this repo to Cloudflare Workers Builds (Git) so pushes deploy; set the weekly backup secret `SUPABASE_DB_URL`.
+4. DNS for ta-nnin.be into Cloudflare, custom domains, move Stripe webhook and Instagram URLs. Checklist: `docs/hosting-cloudflare.md`.
 
 ## Watch out
-- Pushing `main` deploys `tannin-web` and `tannin-admin` on Vercel. Never push a local `main` that has commits `origin/main` does not have (it holds older voucher code; see `docs/project-notes.md`, "Branches").
+- In the old repo `szaidman55/Tannin`, pushing `main` deploys Vercel. This repo deploys nothing yet.
 - Commit messages and files carry no co-author trailers, session links or tool names.
 - Worktree branches are never pushed as they are: rename or merge first.
 - Never write secrets, keys or payment details here.
