@@ -70,6 +70,7 @@
 --   0053_gift_vouchers.sql
 --   0054_gift_voucher_cap.sql
 --   0055_site_content.sql
+--   0056_on_menu.sql
 --   seed.sql
 
 
@@ -5720,6 +5721,20 @@ create policy "pages public read" on pages
 drop policy if exists "marketing write pages" on pages;
 create policy "marketing write pages" on pages
   for all using (has_perm('marketing')) with check (has_perm('marketing'));
+
+-- ╭─ 0056_on_menu.sql ────────────────────────────────────────────────────────
+
+-- Off the menu, not deleted.
+--
+-- The food menu, the bar list and the wine list change with the season, and
+-- dishes and bottles come back. Deleting a row loses its notes, grapes and
+-- position; marking it sold out keeps it on the website (greyed out). This
+-- flag hides a row from the website and the printed menus while the admin
+-- keeps it, with a button to put it back.
+
+alter table menu_items add column if not exists on_menu boolean not null default true;
+alter table drinks     add column if not exists on_menu boolean not null default true;
+alter table wines      add column if not exists on_menu boolean not null default true;
 
 -- ╭─ seed.sql ───────────────────────────────────────────────────────────────
 
