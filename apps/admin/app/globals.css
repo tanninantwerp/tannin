@@ -532,7 +532,8 @@ body {
 }
 
 @media print {
-  body * {
+  /* Only on the buying screen: the menu print pages must not be hidden. */
+  body:has(.order-print) * {
     visibility: hidden;
   }
 

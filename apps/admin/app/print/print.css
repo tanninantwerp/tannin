@@ -232,6 +232,11 @@
 }
 
 @media print {
+  /* Belt and braces against any page-wide 'hide everything' print rule. */
+  .print-root,
+  .print-root * {
+    visibility: visible;
+  }
   .no-print {
     display: none !important;
   }
