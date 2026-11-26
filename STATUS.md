@@ -1,8 +1,14 @@
 # Tannin: status
 
-**Updated:** 2026-11-25 23:50 CET (content editor from 58diamonds LIVE: PR #1 merged, migration 0055 run, both Workers deployed).
+**Updated:** 2026-11-26 00:35 CET (November 2026 menus loaded into the live database; PR #5 'not on the menu' flag live, migration 0056 run, both Workers deployed).
 
 ## State
+<<<<<<< HEAD
+=======
+- **Printed food menu fix (PR #7, admin deployed 2026-11-26):** on two-line dishes the price now follows the last word instead of sitting at the far right. The print QR ('Scan me for drinks') now points to ta-nnin.be/drinks; it pointed to the Vercel demo before, so cards printed earlier open the demo's bar list.
+- **Menus updated to November 2026 on 2026-11-26** (food PDF 'MENU TANNIN NOV 26', wine list 'Winelist to print NOVEMBER 2026', bar list from the one2three QR menu). Food: 9 new, 4 changed, 10 off the menu (afterhours untouched). Bar: 20 new, 24 off. Wine: 224 on the list (72 new), 55 off; countries/regions cleaned for listed bottles. Nothing deleted. Change list and the exact SQL: project files `menu-update-2026-11/`. Checked live: /menu, /wine, /drinks show new items and not the hidden ones.
+- **'Not on the menu' flag (PR #5, migration 0056 run on live):** `on_menu` on `menu_items`, `drinks`, `wines`. Off-menu rows are hidden on the website and print pages; admin keeps them (Food/Bar: Hide button + folded 'Not on the menu' list with Put back; Wine: filter + 'Off the menu'/'Put back on menu'). Sold out still means 'greyed out tonight'.
+>>>>>>> origin/main
 - **Content editor LIVE since 2026-11-25 ~23:45 CET** (PR #1, ported from 58diamonds; PR #3 fixed the "missing a language" filter hiding a text before Save, admin redeployed 23:50): admin tiles Texts (all 353 website texts in EN/NL/FR, search, 'missing a language' filter, Original, DeepL Translate) and Pages (new pages at /<slug>, /nl/<slug>, /fr/<slug>, Markdown text, photo, footer link, sitemap). Needs the `marketing` permission. Messages now live in `packages/content/messages`. Migration 0055 (`site_texts`, `pages`) run on the live Supabase. DeepL API Free key `DEEPL_API_KEY` on the admin Worker (also in `secrets/admin.env`). Checked live: a test page and a French text edit showed on ta-nnin.be and went away when deleted; anon can read, not write; /texts and /pages answer 200. Not yet tried signed in.
 - **ta-nnin.be is LIVE on Cloudflare since 2026-11-25 ~21:50 CET** (replaced the old WordPress site). Registrar Easyhost; nameservers alexia/donovan.ns.cloudflare.com (zone in the Tannin Cloudflare account; the old zone sat in a third-party Cloudflare account). Worker custom domains: ta-nnin.be + www.ta-nnin.be -> tannin-web, admin.ta-nnin.be -> tannin-admin (in `wrangler.jsonc`, workers.dev kept on). Redirect rule www -> apex (301). Old WordPress URLs redirect (next.config.mjs: /about-us, /contact, /food-menu, /wine-menu, /jobs). Checked: pages 200, webhook 400 unsigned, admin 200 on the new nameservers (some resolvers still cached 'no admin' at 22:05).
 - Live Stripe webhook renamed `tannin-web-live`, now -> https://ta-nnin.be/api/stripe/webhook (same secret). Both Workers rebuilt with NEXT_PUBLIC_SITE_URL/WEB_URL=https://ta-nnin.be and ADMIN_URL=https://admin.ta-nnin.be. Admin crons are back ON (reminders are harmless: booking is off).
@@ -35,6 +41,7 @@
 4. Keep Vercel as the demo; delete the disabled live webhook `tannin-web-vercel-live` when sure. Optional: Google Search Console for ta-nnin.be + submit sitemap.
 
 ## Watch out
+- The bar list's source of truth is now the admin, but the QR codes on the tables still point to one2three; syncing by hand means diffing one2three against `drinks` (docs/project-notes.md). Re-point the QR codes to ta-nnin.be/drinks to drop one2three.
 - The Mac deploy clone `~/Documents/GitHub/tannin-cloudflare` is BEHIND main (no content editor; local uncommitted changes equal what is on main). Deploying from it as it is would remove the editor. The 2026-11-25 deploy was done from a fresh clone of main in /tmp: `source ~/.config/tannin-cf/build-env.sh`, `npm ci --include=dev`, `npm run cf:deploy` in apps/web then apps/admin. Bring that clone up to main before using it again.
 - In the old repo `szaidman55/Tannin`, pushing `main` deploys Vercel (the demo, old database). `secrets/web.env`/`admin.env` still hold the OLD Supabase secret key (the copy scripts use it); the live key is `NEW_SUPABASE_SECRET_KEY` in `secrets/supabase.env`. DB copy scripts: `~/.config/tannin-cf/dbtool` on the Mac. This repo deploys nothing yet.
 - Commit messages and files carry no co-author trailers, session links or tool names.

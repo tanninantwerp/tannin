@@ -1,9 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { createMenuItem, deleteMenuItem, updateMenuItem } from '@tannin/supabase';
+import { createMenuItem, deleteMenuItem, setOnMenu, updateMenuItem } from '@tannin/supabase';
 import type { MenuSectionId, MenuService } from '@tannin/core';
 import { getDb } from '@/lib/supabase';
+import { OffMenuList } from './OffMenuList';
 
 interface Row {
   id: string;
@@ -15,6 +16,7 @@ interface Row {
   price_max: number | null;
   with_crackers: boolean;
   sold_out: boolean;
+  on_menu?: boolean;
   position: number;
 }
 
@@ -239,7 +241,8 @@ export function MenuEditor() {
       {error && <p className="mt-4 text-sm text-[var(--danger)]">{error}</p>}
 
       {sections.map((section) => {
-        const items = rows.filter((r) => r.section_id === section.id);
+        const items = rows.filter((r) => r.section_id === section.id && r.on_menu !== false);
+        const offMenu = rows.filter((r) => r.section_id === section.id && r.on_menu === false);
         const newService = section.service !== lastService;
         lastService = section.service;
         const serviceGroup = sections
@@ -275,7 +278,7 @@ export function MenuEditor() {
               >
                 ↓
               </button>
-              {items.length === 0 && (
+              {items.length === 0 && offMenu.length === 0 && (
                 <button
                   onClick={() => removeSection(section)}
                   aria-label={`Remove ${section.title}`}
@@ -394,12 +397,24 @@ export function MenuEditor() {
                     {row.sold_out ? 'Back on' : 'Sold out'}
                   </button>
 
+                  <button
+                    onClick={() => optimistic(row.id, { on_menu: false }, () => setOnMenu(getDb(), 'menu_items', row.id, false))}
+                    title="Take off the menu (kept below, can come back)"
+                    className="btn btn-quiet"
+                  >
+                    Hide
+                  </button>
+
                   <button onClick={() => remove(row)} className="btn btn-quiet" aria-label={`Delete ${row.name}`}>
                     ✕
                   </button>
                 </li>
               ))}
             </ul>
+            <OffMenuList
+              items={offMenu.map((r) => ({ id: r.id, name: r.name, detail: r.note, price: r.price }))}
+              onRestore={(id) => optimistic(id, { on_menu: true }, () => setOnMenu(getDb(), 'menu_items', id, true))}
+            />
 
             {adding === section.id ? (
               <div className="mt-3 flex flex-wrap items-center gap-2">

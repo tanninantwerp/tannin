@@ -34,6 +34,7 @@ interface Wine {
   tasting_note: string | null;
   available: boolean;
   staff_pick: boolean;
+  on_menu?: boolean;
   position: number;
 }
 
@@ -84,6 +85,7 @@ export function WineEditor() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
+  const [listFilter, setListFilter] = useState<'on' | 'off' | 'all'>('on');
   const [colour, setColour] = useState<Colour | 'all'>('all');
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState(BLANK);
@@ -238,7 +240,10 @@ export function WineEditor() {
   if (loading) return <p className="p-8 text-[var(--fs-body)] text-[var(--text-muted)]">Loading the cellar…</p>;
 
   const needle = query.trim().toLowerCase();
+  const onMenuCount = wines.filter((w) => w.on_menu !== false).length;
   const shown = wines.filter((w) => {
+    if (listFilter === 'on' && w.on_menu === false) return false;
+    if (listFilter === 'off' && w.on_menu !== false) return false;
     if (colour !== 'all' && w.colour !== colour) return false;
     if (!needle) return true;
     return `${w.producer} ${w.name} ${w.country} ${w.region ?? ''}`.toLowerCase().includes(needle);
@@ -248,8 +253,9 @@ export function WineEditor() {
     <main className="admin-main">
       <h1 className="page-title">The wine list</h1>
       <p className="page-dek">
-        {wines.length} bottles. Switching one to <strong>Sold out</strong> keeps it on the website,
-        priced out, until it is back - delete it only if it is leaving the list for good.
+        {onMenuCount} bottles on the menu, {wines.length - onMenuCount} kept off it. <strong>Sold out</strong> keeps
+        a bottle on the website, priced out. <strong>Off the menu</strong> hides it from the website but keeps it
+        here, ready to come back. Delete only what is leaving for good.
       </p>
 
       {error && (
@@ -277,6 +283,16 @@ export function WineEditor() {
             <option key={c.key} value={c.key}>{c.label}</option>
           ))}
         </select>
+        <select
+          value={listFilter}
+          onChange={(e) => setListFilter(e.target.value as 'on' | 'off' | 'all')}
+          aria-label="On the menu or not"
+          className="field min-h-11 w-auto"
+        >
+          <option value="on">On the menu</option>
+          <option value="off">Not on the menu</option>
+          <option value="all">Everything</option>
+        </select>
         <button onClick={() => setAdding(!adding)} className="btn btn-primary min-h-11 px-4">
           {adding ? 'Cancel' : 'Add a wine'}
         </button>
@@ -302,7 +318,7 @@ export function WineEditor() {
       )}
 
       <p className="mt-5 text-[var(--fs-label)] text-[var(--text-muted)]">
-        Showing {shown.length} of {wines.length}
+        Showing {shown.length} of {listFilter === 'on' ? onMenuCount : listFilter === 'off' ? wines.length - onMenuCount : wines.length}
       </p>
 
       <ul className="card mt-2 divide-y divide-[var(--surface-edge)]">
@@ -318,7 +334,7 @@ export function WineEditor() {
                 type="button"
                 onClick={() => setExpanded(isOpen ? null : wine.id)}
                 aria-expanded={isOpen}
-                className={`flex w-full min-h-11 items-center justify-between gap-3 p-3 text-left ${wine.available ? '' : 'opacity-60'}`}
+                className={`flex w-full min-h-11 items-center justify-between gap-3 p-3 text-left ${wine.available && wine.on_menu !== false ? '' : 'opacity-60'}`}
               >
                 <span className="min-w-0">
                   <span className="block truncate text-[var(--fs-emphasis)] font-medium">
@@ -329,9 +345,13 @@ export function WineEditor() {
                 <span className="flex shrink-0 items-center gap-2">
                   {wine.staff_pick && <span aria-hidden className="text-[var(--accent)]">★</span>}
                   <span className="text-[var(--fs-emphasis)] font-semibold tabular-nums">€{wine.bottle}</span>
-                  <span className={`chip ${wine.available ? 'chip-on' : 'chip-off'}`}>
-                    {wine.available ? 'On list' : 'Sold out'}
-                  </span>
+                  {wine.on_menu === false ? (
+                    <span className="chip chip-off">Off menu</span>
+                  ) : (
+                    <span className={`chip ${wine.available ? 'chip-on' : 'chip-off'}`}>
+                      {wine.available ? 'On list' : 'Sold out'}
+                    </span>
+                  )}
                 </span>
               </button>
 
@@ -435,6 +455,13 @@ export function WineEditor() {
                       className="btn btn-quiet min-h-11 px-4"
                     >
                       {wine.available ? 'Sold out' : 'Back on'}
+                    </button>
+                    <button
+                      onClick={() => patch(wine.id, { on_menu: wine.on_menu === false })}
+                      title={wine.on_menu === false ? 'Put back on the menu' : 'Take off the menu (kept here, can come back)'}
+                      className="btn btn-quiet min-h-11 px-4"
+                    >
+                      {wine.on_menu === false ? 'Put back on menu' : 'Off the menu'}
                     </button>
                     <button
                       onClick={() => patch(wine.id, { staff_pick: !wine.staff_pick })}

@@ -6,7 +6,7 @@ import { formatPrice, type MenuItem, type MenuSection } from '@tannin/core';
 
 /** Where the "scan me for drinks" QR points: the live bar list on the website. */
 export function drinksUrl(): string {
-  return 'https://tannin-web.vercel.app/drinks';
+  return 'https://ta-nnin.be/drinks';
 }
 
 /** Screen-only bar across the top: a Print button and a size reminder. */
