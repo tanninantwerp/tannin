@@ -211,7 +211,7 @@ export function TextsEditor() {
                   </span>
                   <span className="flex-1">{s.name}</span>
                   {unsaved > 0 && <span className="text-[var(--fs-label)] text-[var(--warn)]">{unsaved} not saved</span>}
-                  {edited > 0 && <span className="text-[var(--fs-label)] text-[var(--accent)]">{edited} changed by you</span>}
+                  {edited > 0 && <span className="text-[var(--fs-label)] text-[var(--accent)]">{edited} edited</span>}
                   <span className="text-[var(--fs-label)] text-[var(--text-muted)]">{s.texts.length === 1 ? '1 text' : `${s.texts.length} texts`}</span>
                 </button>
                 {isOpen && <ul className="flex flex-col gap-3 border-t border-[var(--surface-edge)] p-3">{s.texts.map((t) => field(t))}</ul>}
