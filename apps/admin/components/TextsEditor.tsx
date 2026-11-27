@@ -51,7 +51,9 @@ export function TextsEditor() {
   const q = query.trim().toLowerCase();
   const matches = (t: TextDef) =>
     (!onlyMissing || missingSaved(t).length > 0 || changed(t.key)) &&
-    (!q || [t.key, t.label, ...Object.values(current(t))].some((v) => v?.toLowerCase().includes(q)));
+    // Searched in the saved wording, and a text being edited always stays, so
+    // deleting the searched word does not make it vanish before Save.
+    (!q || changed(t.key) || [t.key, t.label, ...Object.values({ ...t.value, ...strip(saved[t.key]) })].some((v) => v?.toLowerCase().includes(q)));
   const filtering = Boolean(q) || onlyMissing;
   const found = filtering ? sections.flatMap((s) => s.texts.filter(matches)) : [];
   const missingTotal = sections.reduce((n, s) => n + s.texts.filter((t) => missingSaved(t).length > 0).length, 0);
@@ -211,8 +213,8 @@ export function TextsEditor() {
                   </span>
                   <span className="flex-1">{s.name}</span>
                   {unsaved > 0 && <span className="text-[var(--fs-label)] text-[var(--warn)]">{unsaved} not saved</span>}
-                  {edited > 0 && <span className="text-[var(--fs-label)] text-[var(--text-muted)]">{edited} changed</span>}
-                  <span className="text-[var(--fs-label)] text-[var(--text-muted)]">{s.texts.length}</span>
+                  {edited > 0 && <span className="text-[var(--fs-label)] text-[var(--accent)]">{edited} edited</span>}
+                  <span className="text-[var(--fs-label)] text-[var(--text-muted)]">{s.texts.length === 1 ? '1 text' : `${s.texts.length} texts`}</span>
                 </button>
                 {isOpen && <ul className="flex flex-col gap-3 border-t border-[var(--surface-edge)] p-3">{s.texts.map((t) => field(t))}</ul>}
               </li>
