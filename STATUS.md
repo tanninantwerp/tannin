@@ -1,8 +1,9 @@
 # Tannin: status
 
-**Updated:** 2026-11-26 00:35 CET (November 2026 menus loaded into the live database; PR #5 'not on the menu' flag live, migration 0056 run, both Workers deployed).
+**Updated:** 2026-11-27 19:40 CET (Cyprus and Slovakia added to the wine country filter; web Worker deployed by Sacha).
 
 ## State
+- **Wine country filter (2026-11-27, web deployed):** Cyprus and Slovakia added to `COUNTRIES` (packages/core/src/origin.ts) and `WINE_COUNTRIES` (wines.ts) + test. Only apps/web uses this list. Checked live: both in the dropdown on /wine and /nl/wijnkaart, nothing under 'Not filed by country'. szaidman55 is now a collaborator (Write) on this repo. Open: Vouni Panayia 'Woman in the Wine Press' still has region 'Cyprus' (should be empty); off-menu wines not yet searched for other Cypriot bottles.
 - **Print menus printed blank (fixed in PR #9, 2026-11-26; NOT DEPLOYED YET: deploy admin from the Mac):** a print rule for the shopping list (`body * { visibility: hidden }` in admin globals.css) hid every print page. Now scoped to pages with `.order-print`, and print.css forces `.print-root` visible. Checked with a headless print of the food menu.
 - **Printed food menu fix (PR #7, admin deployed 2026-11-26):** on two-line dishes the price now follows the last word instead of sitting at the far right. The print QR ('Scan me for drinks') now points to ta-nnin.be/drinks; it pointed to the Vercel demo before, so cards printed earlier open the demo's bar list.
 - **Menus updated to November 2026 on 2026-11-26** (food PDF 'MENU TANNIN NOV 26', wine list 'Winelist to print NOVEMBER 2026', bar list from the one2three QR menu). Food: 9 new, 4 changed, 10 off the menu (afterhours untouched). Bar: 20 new, 24 off. Wine: 224 on the list (72 new), 55 off; countries/regions cleaned for listed bottles. Nothing deleted. Change list and the exact SQL: project files `menu-update-2026-11/`. Checked live: /menu, /wine, /drinks show new items and not the hidden ones.
