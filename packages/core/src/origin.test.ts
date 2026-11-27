@@ -38,6 +38,18 @@ describe('resolveWineOrigin', () => {
     expect(resolveWineOrigin({ country: 'Rosso Di Montalcino' }).country).toBe('Italy');
   });
 
+  it('files Cyprus and Slovakia as countries', () => {
+    expect(resolveWineOrigin({ country: 'Cyprus' })).toMatchObject({
+      country: 'Cyprus',
+      ambiguous: false,
+    });
+    expect(resolveWineOrigin({ country: 'Slovakia', region: 'Malé Karpaty' })).toEqual({
+      country: 'Slovakia',
+      region: 'Malé Karpaty',
+      ambiguous: false,
+    });
+  });
+
   it('refuses to guess an origin that names two countries', () => {
     const r = resolveWineOrigin({ country: 'Slovenia x Italy' });
     expect(r.country).toBeNull();
